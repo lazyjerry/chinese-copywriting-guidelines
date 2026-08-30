@@ -264,6 +264,53 @@ CSS Text Module Level 4 的 [`text-spacing`](https://www.w3.org/TR/css-text-4/#t
 [hustcc/hint](https://github.com/hustcc/hint) | other | Python
 [n0vad3v/Tekorrect](https://github.com/n0vad3v/Tekorrect) | other | Python
 
+## Skill
+
+`skills/chinese-copywriting/` 是給 AI 編碼代理（Claude Code、Codex CLI、Copilot CLI、OpenCode、Cursor 等）使用的 skill，把本文的規則做成可自動套用的校對與撰寫流程，並附一支檢查腳本。
+
+### 安裝
+
+各家工具的 skills 目錄都只認第一層，把整個 `chinese-copywriting` 目錄放進去即可：
+
+| 工具 | 全域 | 專案 |
+| --- | --- | --- |
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Codex CLI | `~/.agents/skills/` | `.agents/skills/` |
+| Copilot CLI | `~/.copilot/skills/` | `.github/skills/` |
+| OpenCode | `~/.config/opencode/skills/` | `.claude/skills/` |
+| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
+
+以 Claude Code 全域安裝為例：
+
+```bash
+git clone https://github.com/lazyjerry/chinese-copywriting-guidelines.git
+cp -r chinese-copywriting-guidelines/skills/chinese-copywriting ~/.claude/skills/
+```
+
+或改建 symlink，之後 `git pull` 就能同步更新：
+
+```bash
+ln -s "$(pwd)/skills/chinese-copywriting" ~/.claude/skills/chinese-copywriting
+```
+
+裝好之後，請代理校對或撰寫中文文案時就會自動觸發。
+
+### 檢查腳本
+
+腳本可以單獨使用，不需要 AI 代理：
+
+```bash
+# 只報告，有違規時 exit code 為 1
+python3 skills/chinese-copywriting/scripts/check_copywriting.py <檔案>
+
+# 就地修正
+python3 skills/chinese-copywriting/scripts/check_copywriting.py --fix <檔案>
+```
+
+`--fix` 只處理可安全機械判定的規則：中英文與數字之間的空格、數字與單位之間的空格、全形標點旁多餘的空白、重複的標點、全形數字。大小寫、不道地的縮寫等需要語意判斷的項目一律只報告，不自動改。加上 `--dispute` 會一併檢查〈爭議〉一節的兩條規則。
+
+腳本會自動跳過程式碼區塊、行內程式碼的內容、URL、Markdown 連結目標與表格分隔線、HTML 標籤屬性，以及 YAML frontmatter。
+
 ## 誰在這樣做？
 
 網站 | 文案 | UGC
