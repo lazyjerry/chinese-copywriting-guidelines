@@ -82,7 +82,9 @@ class Issue:
 MASK = "\x00"
 
 INLINE_CODE_RE = re.compile(r"(`+)(?:.*?)\1")
-LINK_TARGET_RE = re.compile(r"\]\([^)]*\)")
+# 連結目標允許一層成對括號，例如 MSDN 的 …/ms531164(v=vs.85).aspx
+LINK_DEST = r"(?:[^()]|\([^()]*\))*"
+LINK_TARGET_RE = re.compile(rf"\]\({LINK_DEST}\)")
 AUTOLINK_RE = re.compile(r"<[^>\s]+>")
 BARE_URL_RE = re.compile(r"(?:https?://|ftp://|www\.)[^\s，。！？「」（）]+")
 HTML_TAG_RE = re.compile(r"</?[A-Za-z][^>]*>")
@@ -444,7 +446,7 @@ def find_en_fullwidth_punct(masked, line):
 # 只認 Markdown 連結本身，別把一般的半形括號也算進去。
 # 連結目標在遮罩行已被抹掉，因此這條規則直接掃原始行。
 LINK_NO_SPACE_RE = re.compile(
-    rf"[{CJK}]\[[^\]]+\]\(|\]\([^)]*\)[{CJK}]"
+    rf"[{CJK}]\[[^\]]+\]\(|\]\({LINK_DEST}\)[{CJK}]"
 )
 CURLY_QUOTE_RE = re.compile(r"[“”‘’]")
 
