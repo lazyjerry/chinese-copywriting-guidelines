@@ -1,0 +1,1 @@
+校對 skill-tests/evals/fixtures/product-note.md，只要報告不要改檔。
