@@ -11,7 +11,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$HERE/script"
 
-GREEN=(test_cases test_fix test_cli test_citations)
+GREEN=(test_cases test_fix test_cli test_citations test_report test_units)
 RED=(test_gaps)
 
 green_only=0

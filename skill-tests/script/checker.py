@@ -22,28 +22,30 @@ fix_file = _module.fix_file
 FIXABLE = _module.FIXABLE
 RULE_TITLES = _module.RULE_TITLES
 UNITS = _module.UNITS
+parse_units = _module.parse_units
+module = _module
 
 
-def check_text(text, dispute=False):
+def check_text(text, dispute=False, extra_units=()):
     """把一段文字寫進暫存檔再檢查，回傳 Issue 清單。"""
     import tempfile
     with tempfile.NamedTemporaryFile("w", suffix=".md", encoding="utf-8", delete=False) as f:
         f.write(text)
         path = f.name
     try:
-        return check_file(path, dispute=dispute)
+        return check_file(path, dispute=dispute, extra_units=extra_units)
     finally:
         Path(path).unlink(missing_ok=True)
 
 
-def fix_text(text):
+def fix_text(text, extra_units=()):
     """把一段文字寫進暫存檔跑 --fix，回傳 (修正後內容, 改動行數)。"""
     import tempfile
     with tempfile.NamedTemporaryFile("w", suffix=".md", encoding="utf-8", delete=False) as f:
         f.write(text)
         path = f.name
     try:
-        changed = fix_file(path)
+        changed = fix_file(path, extra_units=extra_units)
         return Path(path).read_text(encoding="utf-8"), changed
     finally:
         Path(path).unlink(missing_ok=True)

@@ -13,7 +13,7 @@
 ## 現在應該是紅的
 
 紅燈是真的失敗，沒有用 `expectedFailure` 蓋掉——把紅燈藏成綠色等於沒測。
-失敗數不等於缺陷數：28 條缺陷展開成 30 個失敗的 subtest，因為修正缺陷同時
+失敗數不等於缺陷數：27 條缺陷展開成 29 個失敗的 subtest，因為修正缺陷同時
 違反「修完要乾淨」與「再跑不動」兩條不變量。
 
 逐條說明見 [KNOWN-GAPS.md](KNOWN-GAPS.md)。修好一條，對應的紅燈會自己轉綠。
@@ -32,9 +32,9 @@ skill-tests/
 ├─ check-upstream-drift.sh    選用，需網路：比對本地 README 與上游是否仍一致
 ├─ KNOWN-GAPS.md              缺陷清單，由 gaps.py 生成
 ├─ script/
-│  ├─ cases/                  10 份約 500 字的樣本文本
+│  ├─ cases/                  11 份約 500 字的樣本文本
 │  ├─ cases.json              違規快照，由 regenerate_cases.py 生成
-│  ├─ gaps.py                 缺陷清單的唯一來源
+│  ├─ gaps.py                 缺陷與需裁決清單的唯一來源
 │  ├─ citations-baseline.json 引用索引的基準，由 regenerate_citations.py 生成
 │  ├─ checker.py              載入待測腳本，並提供 check_text／fix_text
 │  ├─ citations.py            解析 README 結構與 rules.md 的索引表
@@ -42,6 +42,8 @@ skill-tests/
 │  ├─ test_gaps.py            紅燈
 │  ├─ test_fix.py             --fix 逐條規則與邊界
 │  ├─ test_cli.py             exit code、JSON、旗標
+│  ├─ test_units.py           --units 與自訂單位的重疊
+│  ├─ test_report.py          報告落地路徑與 .gitignore
 │  └─ test_citations.py       行號正確性、來源漂移、文件自我一致
 └─ evals/                     模型行為，見 evals/README.md
 ```
@@ -65,6 +67,21 @@ python3 skill-tests/script/regenerate_cases.py
 
 `regenerate_citations.py` 是唯一需要停下來想一下的：雜湊對不上代表 README 改了，
 要先確認 `references/rules.md` 的行號與細則要不要跟著改，不要直接覆蓋基準了事。
+
+## 三種樣本標記
+
+`gaps.py` 收三類，斷言的語意各不相同：
+
+| 類別 | 意思 | 測在哪 | 現在是 |
+| --- | --- | --- | --- |
+| `GAPS` | 缺陷：本來做得到卻沒做到，修好會轉綠 | `test_gaps.py` | 紅 |
+| `FIX_GAPS`／`BEHAVIOUR_GAPS` | `--fix` 自己製造出新違規，或動到不該動的 | `test_gaps.py` | 紅 |
+| `ADJUDICATION` | **預期會出錯的例子**：規則層分不出來、修不好，靠裁決步驟消除 | `test_units.py` | 綠 |
+
+第三類最容易搞混。`5G` 被報成違規確實是誤報，但它不是缺陷——`5G` 與 `3bar` 在正則眼裡
+形狀相同，那個形狀本身不帶區分資訊。登記成缺陷就會永遠紅，而永遠紅的測試等於沒有測試。
+所以腳本層只鎖「誤報不會造成傷害」（一律 `low`、不可修、`--fix` 逐字不變），
+真正要它消失得看模型，那在 `evals/cases/custom-unit-overlap`。
 
 ## 樣本刻意寫錯
 

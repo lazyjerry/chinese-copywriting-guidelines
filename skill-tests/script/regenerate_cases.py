@@ -32,6 +32,7 @@ TITLES = {
     "case-08-masking.md": "遮罩區段一律不檢查",
     "case-09-code-span.md": "行內程式碼兩側的空格",
     "case-10-dispute.md": "爭議規則預設關閉",
+    "case-11-unit-overlap.md": "自訂單位與產品代號的重疊",
 }
 
 
@@ -54,6 +55,8 @@ def snapshot(path):
         ),
         "gaps": gaps.gaps_for(rel),
         "fix_gaps": gaps.fix_gaps_for(rel),
+        "adjudication": gaps.adjudication_for(rel),
+        "adjudication_units": gaps.adjudication_units(rel),
     }
 
 
@@ -68,7 +71,11 @@ def main():
     )
     total_expect = sum(c["expect_total"] for c in cases)
     total_gaps = sum(len(c["gaps"]) + len(c["fix_gaps"]) for c in cases)
-    print(f"寫入 cases.json：{len(cases)} 個 case、綠燈 {total_expect} 項、紅燈 {total_gaps} 項")
+    total_adj = sum(len(c["adjudication"]) for c in cases)
+    print(
+        f"寫入 cases.json：{len(cases)} 個 case、綠燈 {total_expect} 項、"
+        f"紅燈 {total_gaps} 項、需裁決 {total_adj} 項"
+    )
 
 
 if __name__ == "__main__":

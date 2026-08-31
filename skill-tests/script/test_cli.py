@@ -46,7 +46,10 @@ class TestExitCode(unittest.TestCase):
 
 
 class TestJsonOutput(unittest.TestCase):
-    FIELDS = {"path", "line", "column", "rule", "title", "message", "snippet", "fixable"}
+    FIELDS = {
+        "path", "line", "column", "rule", "title", "message", "snippet",
+        "confidence", "in_example", "fixable",
+    }
 
     def test_shape(self):
         data = json.loads(run("--json", DIRTY).stdout)
@@ -54,7 +57,33 @@ class TestJsonOutput(unittest.TestCase):
         for item in data:
             self.assertEqual(self.FIELDS, set(item), "JSON 欄位不得增減，下游靠它解析")
             self.assertEqual(item["title"], checker.RULE_TITLES[item["rule"]])
-            self.assertIs(item["fixable"], item["rule"] in checker.FIXABLE)
+            self.assertIn(item["confidence"], ("high", "low"))
+            self.assertIs(
+                item["fixable"],
+                item["rule"] in checker.FIXABLE
+                and item["confidence"] == "high"
+                and not item["in_example"],
+                "fixable 是三個條件的合取：規則可修、信心度高、不是規則書反例",
+            )
+
+    def test_low_confidence_is_never_fixable(self):
+        """模型要靠這條分流：拿不準的一律不自動修。"""
+        rulebook = str(checker.REPO_ROOT / "README.md")
+        data = json.loads(run("--json", "--dispute", DIRTY, rulebook).stdout)
+        low = [i for i in data if i["confidence"] == "low"]
+        self.assertTrue(low, "樣本裡應該要有需要裁決的項目，否則這條測試沒在測東西")
+        self.assertEqual([], [i for i in low if i["fixable"]])
+
+    def test_rulebook_counterexamples_are_marked(self):
+        """README 的違規全部來自「錯誤：」底下刻意寫錯的示範句。"""
+        rulebook = str(checker.REPO_ROOT / "README.md")
+        data = json.loads(run("--json", rulebook).stdout)
+        self.assertTrue(data)
+        self.assertEqual(
+            [], [i for i in data if not i["in_example"]],
+            "規則書正文不該有違規，報出來的必須都落在反例區塊裡",
+        )
+        self.assertEqual([], [i for i in data if i["fixable"]])
 
     def test_clean_file_is_empty_array(self):
         self.assertEqual([], json.loads(run("--json", CLEAN).stdout))

@@ -28,6 +28,22 @@ HEAD = """# 已知缺陷
 - **修正缺陷**：`--fix` 自己製造出新的違規，或動到不該動的東西
 """
 
+ADJUDICATION_HEAD = """
+## 需裁決：規則層分不出來的
+
+**這些是預期會出錯的例子。** 帶了 `--units` 之後腳本一定會把 `5G` 報成違規，那就是誤報。
+
+它不列進上面的誤報，因為那一類的定義是「不該報卻報了，修好就會轉綠」，而這條**修不好**——
+`5G` 與 `3bar` 在 `UNIT_RE` 眼裡形狀相同（數字緊接英文、兩側不接字母），
+那個形狀本身不帶區分資訊。誤報要在裁決步驟消除，不是在腳本層。
+
+腳本層能保證的只有**誤報不會造成傷害**：一律標 `low`、一律不可修、`--fix` 之後逐字不變。
+這三條是綠燈，鎖在 `script/test_units.py`。模型有沒有真的 drop 掉，
+只有 `evals/cases/custom-unit-overlap` 測得到。
+
+不帶 `--units` 時這些一筆都不會報——誤報只在使用者主動擴充單位表時才存在。
+"""
+
 ROOT_CAUSE = """
 ## 根因：手寫常數的覆蓋率
 
@@ -75,6 +91,11 @@ FW_OPENING = "（「『【《〈"
 `pint` 這類函式庫有完整的單位登錄表，但引入依賴違反這支腳本零依賴的前提。
 參考它的單位表，不要引入它。
 
+`--units` **不是這些漏報的修法**，是給使用者的臨時出口。帶進來的單位沒有經過上面兩條
+護欄篩選，所以一律標 `low`、不自動修——`5G`、`4K`、`3in1`、`2T` 跟 `3bar`、`65W`、`24h`
+在正則眼裡形狀相同，只有上下文分得出來，那是裁決步驟的事。底下這些漏報要真的轉綠，
+還是得把單位收進 `UNITS` 並確認它們過得了兩條護欄。
+
 ### `--fix` 的共同修法
 
 兩條修正缺陷的成因相同：`FIXERS` 是單向一次 pass，後面的修正會製造出前面才處理的違規。
@@ -113,6 +134,18 @@ def main():
         lines.append(f"| {n} | 不綁樣本 | — | — | {title}。{why} |")
 
     lines.append(f"\n合計 **{n}** 條。")
+
+    lines.append(ADJUDICATION_HEAD)
+    lines.append("| 樣本 | 行 | 片段 | 帶入的單位 | 裁決 | 實際是什麼 |")
+    lines.append("| --- | --- | --- | --- | --- | --- |")
+    for path, entries in gaps.ADJUDICATION.items():
+        sample = path.split("/")[-1]
+        for ln, rule, frag, unit, verdict, why in entries:
+            label = "drop" if verdict == "code" else "keep 並補空格"
+            lines.append(
+                f"| `{sample}` | {ln} | `{frag}` | `{unit}` | **{label}** | {why} |"
+            )
+
     lines.append(ROOT_CAUSE)
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"寫入 KNOWN-GAPS.md：{n} 條缺陷")

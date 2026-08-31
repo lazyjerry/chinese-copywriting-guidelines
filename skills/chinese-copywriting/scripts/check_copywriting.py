@@ -2,7 +2,7 @@
 """依《中文文案排版指北》檢查中文文案排版，可選擇就地修正。
 
 用法：
-    check_copywriting.py [--fix] [--json] [--dispute] <file>...
+    check_copywriting.py [--fix] [--json] [--dispute] [--units U1,U2] <file>...
 
 不帶 --fix 時只報告；有違規時 exit code 為 1。
 """
@@ -19,7 +19,9 @@ EXCEPTION_TERMS = [
     "豆瓣FM",
 ]
 
-# 規則 3 的單位。只收大小寫敏感、不易與一般英文單字混淆的常見單位
+# 規則 3 的單位。只收大小寫敏感、不易與一般英文單字混淆的常見單位。
+# 這份表刻意窄——單位縮寫與英文單字、產品代號大量重疊（`bar`、`in`、`5G` 的 G），
+# 收得寬就會誤報。要擴充走 --units，那些單位一律標 low 交模型裁決。
 UNITS = [
     "Gbps", "Mbps", "Kbps", "bps",
     "TB", "GB", "MB", "KB", "PB",
@@ -51,15 +53,31 @@ RULE_TITLES = {
 # --fix 能安全處理的規則；其餘只報告
 FIXABLE = {"R1", "R2", "R3", "R4", "R5", "R7"}
 
+# 規則命中但需要上下文才能定奪的項目標成 low，一律不自動修，交給模型逐筆裁決。
+# 純字元層、無歧義的標 high。
+HIGH = "high"
+LOW = "low"
+
 
 class Issue:
-    def __init__(self, path, line, col, rule, message, snippet):
+    def __init__(self, path, line, col, rule, message, snippet,
+                 confidence=HIGH, in_example=False):
         self.path = path
         self.line = line
         self.col = col
         self.rule = rule
         self.message = message
         self.snippet = snippet
+        self.confidence = confidence
+        self.in_example = in_example
+
+    @property
+    def fixable(self):
+        return (
+            self.rule in FIXABLE
+            and self.confidence == HIGH
+            and not self.in_example
+        )
 
     def as_dict(self):
         return {
@@ -70,7 +88,9 @@ class Issue:
             "title": RULE_TITLES[self.rule],
             "message": self.message,
             "snippet": self.snippet,
-            "fixable": self.rule in FIXABLE,
+            "confidence": self.confidence,
+            "in_example": self.in_example,
+            "fixable": self.fixable,
         }
 
 
@@ -114,11 +134,23 @@ def mask_line(line):
     return masked
 
 
+# 規則書的反例：一行以冒號收尾且點明是錯誤示範，其後連續的 blockquote 就是
+# 刻意寫錯的教材。這些行照常偵測、照常回報，只是標記起來不自動修。
+EXAMPLE_LEAD_RE = re.compile(r"[:：]\s*$")
+
+
+def _is_counterexample_lead(stripped):
+    if not EXAMPLE_LEAD_RE.search(stripped):
+        return False
+    return "錯" in stripped or "對比用法" in stripped
+
+
 def scannable_lines(lines):
-    """產生 (index, masked_line)，跳過 fenced code block 與 YAML frontmatter。"""
+    """產生 (index, masked_line, in_example)，跳過 fenced code block 與 YAML frontmatter。"""
     in_fence = False
     fence_marker = ""
     in_frontmatter = False
+    in_counterexample = False
 
     for i, raw in enumerate(lines):
         stripped = raw.strip()
@@ -148,11 +180,17 @@ def scannable_lines(lines):
         if re.match(r"^(\t| {4,})\S", raw) and raw.strip():
             continue
 
-        yield i, mask_line(raw)
+        is_quote = stripped.startswith(">")
+        if _is_counterexample_lead(stripped):
+            in_counterexample = True
+        elif stripped and not is_quote:
+            in_counterexample = False
+
+        yield i, mask_line(raw), in_counterexample and is_quote
 
 
 # ---------------------------------------------------------------------------
-# 各規則：偵測回傳 (col, message, snippet)；修正回傳新字串。
+# 各規則：偵測回傳 (col, rule, message, snippet, confidence)；修正回傳新字串。
 # 修正一律作用在原始行上，但比對位置取自遮罩行，因此遮罩區段不會被改到。
 # ---------------------------------------------------------------------------
 
@@ -183,6 +221,7 @@ def find_missing_space(masked, line):
                     rule,
                     f"「{m.group(0)}」之間需要增加空格",
                     snippet_of(line, m.start(), m.end()),
+                    HIGH,
                 )
             )
     return issues
@@ -230,6 +269,7 @@ def find_code_span_space(masked, line):
             "R1",
             "行內程式碼與中文之間需要增加空格",
             snippet_of(line, max(0, pos - 1), min(len(line), pos + 1)),
+            HIGH,
         )
         for pos in _code_span_boundaries(line)
     ]
@@ -242,9 +282,35 @@ def fix_code_span_space(masked, line):
     return result
 
 
-UNIT_RE = re.compile(r"(?<![A-Za-z])(\d)(" + "|".join(UNITS) + r")(?![A-Za-z])")
-# 度數與百分比反過來：數字與 ° %  之間不該有空格
-DEGREE_SPACE_RE = re.compile(r"(\d)\s+([°%])")
+def build_unit_re(extra=()):
+    """把內建與自訂單位組成一條正則。長的排前面，避免短的先匹配掉。"""
+    units = list(UNITS) + [u for u in extra if u not in UNITS]
+    alternation = "|".join(re.escape(u) for u in sorted(units, key=len, reverse=True))
+    return re.compile(rf"(?<![A-Za-z])(\d)({alternation})(?![A-Za-z])")
+
+
+UNIT_RE = build_unit_re()
+
+# 使用者帶進來的單位。內建表是篩過的，自訂的沒有，所以命中一律標 low：
+# `5G`、`3in1`、`4K` 這種數字加英文的寫法跟單位長得一模一樣，只有上下文分得出來。
+CUSTOM_UNITS = set()
+
+
+def configure_units(extra=()):
+    """設定自訂單位。每次檢查都會呼叫，不帶參數就是重置回內建表。"""
+    global UNIT_RE, CUSTOM_UNITS
+    CUSTOM_UNITS = {u.strip() for u in extra if u and u.strip()} - set(UNITS)
+    UNIT_RE = build_unit_re(CUSTOM_UNITS)
+
+
+def parse_units(raw):
+    """把 --units 的逗號字串拆成單位清單。"""
+    if not raw:
+        return []
+    return [u.strip() for u in raw.split(",") if u.strip()]
+# 度數與百分比反過來：數字與 ° %  之間不該有空格。
+# 溫標 °C／°F／°K 例外——依國際單位制，數字與溫標之間要留白，`25 °C` 是正確寫法。
+DEGREE_SPACE_RE = re.compile(r"(\d)\s+(°(?![CFK])|%)")
 
 
 def find_unit_space(masked, line):
@@ -258,6 +324,7 @@ def find_unit_space(masked, line):
                 "R3",
                 f"數字與單位「{m.group(2)}」之間需要增加空格",
                 snippet_of(line, m.start(), m.end()),
+                LOW if m.group(2) in CUSTOM_UNITS else HIGH,
             )
         )
     for m in DEGREE_SPACE_RE.finditer(masked):
@@ -269,6 +336,7 @@ def find_unit_space(masked, line):
                 "R3",
                 f"數字與「{m.group(2)}」之間不需要增加空格",
                 snippet_of(line, m.start(), m.end()),
+                HIGH,
             )
         )
     return issues
@@ -277,7 +345,7 @@ def find_unit_space(masked, line):
 def fix_unit_space(masked, line):
     result = line
     for m in reversed(list(UNIT_RE.finditer(masked))):
-        if MASK in m.group(0):
+        if MASK in m.group(0) or m.group(2) in CUSTOM_UNITS:
             continue
         pos = m.start() + 1
         result = result[:pos] + " " + result[pos:]
@@ -306,7 +374,7 @@ def find_fullwidth_space(masked, line):
             if MASK in m.group(0):
                 continue
             issues.append(
-                (m.start() + 1, "R4", msg, snippet_of(line, m.start(), m.end()))
+                (m.start() + 1, "R4", msg, snippet_of(line, m.start(), m.end()), HIGH)
             )
     return issues
 
@@ -333,6 +401,7 @@ def find_duplicate_punct(masked, line):
                 "R5",
                 f"重複使用標點符號「{m.group(0)}」",
                 snippet_of(line, m.start(), m.end()),
+                HIGH,
             )
         )
     return issues
@@ -360,8 +429,17 @@ CJK_PAREN_RE = re.compile(rf"(?:[{CJK}]\s*\(|\)\s*[{CJK}])")
 
 
 def find_halfwidth_punct(masked, line):
+    """半形逗號、驚嘆號這類無歧義；引號與括號要看上下文才知道是不是誤用。
+
+    `呼叫 setState() 之後` 的括號屬於程式碼寫法而非中文標點，正則分不出來，
+    所以這兩條標 low 交給模型裁決。
+    """
     issues = []
-    for pattern in (HALFWIDTH_PUNCT_RE, CJK_QUOTE_RE, CJK_PAREN_RE):
+    for pattern, confidence in (
+        (HALFWIDTH_PUNCT_RE, HIGH),
+        (CJK_QUOTE_RE, LOW),
+        (CJK_PAREN_RE, LOW),
+    ):
         for m in pattern.finditer(masked):
             if MASK in m.group(0):
                 continue
@@ -371,6 +449,7 @@ def find_halfwidth_punct(masked, line):
                     "R6",
                     "中文語境內應使用全形標點",
                     snippet_of(line, m.start(), m.end()),
+                    confidence,
                 )
             )
     return issues
@@ -390,6 +469,7 @@ def find_fullwidth_digit(masked, line):
                 "R7",
                 f"數字應使用半形「{m.group(0)}」",
                 snippet_of(line, m.start(), m.end()),
+                HIGH,
             )
         )
     return issues
@@ -427,6 +507,7 @@ def find_en_fullwidth_punct(masked, line):
                     "R8",
                     "英文書籍名、報刊名應以英文斜體表示，不借用中文書名號",
                     snippet_of(line, span.start(), span.end()),
+                    LOW,
                 )
             )
             continue
@@ -438,6 +519,7 @@ def find_en_fullwidth_punct(masked, line):
                     "R8",
                     f"英文整句內應使用半形標點，不用「{m.group(0)}」",
                     snippet_of(line, pos, pos + 1),
+                    LOW,
                 )
             )
     return issues
@@ -460,6 +542,7 @@ def find_link_space(masked, line):
                 "R11",
                 "超連結與中文之間可增加空格（爭議規則）",
                 snippet_of(line, m.start(), m.end()),
+                HIGH,
             )
         )
     return issues
@@ -476,6 +559,7 @@ def find_curly_quote(masked, line):
                 "R12",
                 "建議改用直角引號「」『』（爭議規則）",
                 snippet_of(line, m.start(), m.end()),
+                HIGH,
             )
         )
     return issues
@@ -505,28 +589,35 @@ FIXERS = [
 ]
 
 
-def check_file(path, dispute=False):
+def check_file(path, dispute=False, extra_units=()):
+    configure_units(extra_units)
     with open(path, encoding="utf-8") as f:
         lines = f.read().splitlines()
 
     detectors = DETECTORS + (DISPUTE_DETECTORS if dispute else [])
     issues = []
-    for i, masked in scannable_lines(lines):
+    for i, masked, in_example in scannable_lines(lines):
         for detector in detectors:
-            for col, rule, message, snippet in detector(masked, lines[i]):
-                issues.append(Issue(path, i + 1, col, rule, message, snippet))
+            for col, rule, message, snippet, confidence in detector(masked, lines[i]):
+                issues.append(
+                    Issue(path, i + 1, col, rule, message, snippet,
+                          confidence, in_example)
+                )
     issues.sort(key=lambda x: (x.line, x.col, x.rule))
     return issues
 
 
-def fix_file(path):
+def fix_file(path, extra_units=()):
+    configure_units(extra_units)
     with open(path, encoding="utf-8") as f:
         original = f.read()
     lines = original.splitlines()
     newline = "\r\n" if "\r\n" in original else "\n"
 
     changed = 0
-    for i, _ in scannable_lines(lines):
+    for i, _, in_example in scannable_lines(lines):
+        if in_example:
+            continue
         line = lines[i]
         for fixer in FIXERS:
             line = fixer(mask_line(line), line)
@@ -551,12 +642,18 @@ def main():
     parser.add_argument(
         "--dispute", action="store_true", help="一併檢查爭議規則（R11、R12）"
     )
+    parser.add_argument(
+        "--units",
+        metavar="UNIT[,UNIT...]",
+        help="擴充規則 3 的單位表，逗號分隔。這些單位命中一律標 low、不自動修",
+    )
     args = parser.parse_args()
+    extra_units = parse_units(args.units)
 
     if args.fix:
         total = 0
         for path in args.files:
-            changed = fix_file(path)
+            changed = fix_file(path, extra_units=extra_units)
             total += changed
             if not args.json:
                 print(f"{path}: 修正 {changed} 行")
@@ -566,7 +663,9 @@ def main():
 
     all_issues = []
     for path in args.files:
-        all_issues.extend(check_file(path, dispute=args.dispute))
+        all_issues.extend(
+            check_file(path, dispute=args.dispute, extra_units=extra_units)
+        )
 
     if args.json:
         print(
@@ -576,7 +675,7 @@ def main():
         )
     else:
         for issue in all_issues:
-            mark = "" if issue.rule in FIXABLE else "（需人工判斷）"
+            mark = "" if issue.fixable else "（需人工判斷）"
             print(
                 f"{issue.path}:{issue.line}:{issue.col}: "
                 f"[{issue.rule}] {issue.message}{mark}"

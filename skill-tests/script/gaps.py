@@ -17,8 +17,6 @@ GAPS = {
          9),
     ],
     "cases/case-03-units.md": [
-        (29, "R3", "25 °", "false_positive",
-         "攝氏度依國際單位制應保留空格，DEGREE_SPACE_RE 沒分辨角度與溫度，把正確寫法判成違規"),
         (21, "R3", "44.1kHz", "missed", "UNITS 收了 KHz 卻沒收正確 SI 寫法的 kHz"),
         (21, "R3", "120dB", "missed", "UNITS 缺聲壓單位 dB"),
         (23, "R3", "5000mAh", "missed", "UNITS 缺電池容量單位 mAh"),
@@ -99,6 +97,48 @@ def fix_gaps_for(rel_path):
     ]
 
 
+# --units 帶進來的單位命中之後，規則層分不出這是量測值還是產品代號——
+# `5G` 與 `3bar` 在 UNIT_RE 眼裡形狀相同，那個形狀本身不帶區分資訊。
+#
+# 這些是**預期會出錯的例子**：腳本一定會把 `5G` 報成違規，那就是誤報。
+# 它不列進 GAPS 的 false_positive，因為那類的斷言是「不該報卻報了，修好就會轉綠」，
+# 而這條修不好——正則永遠分不出來。誤報要在裁決步驟消除，不是在腳本層。
+#
+# 所以腳本層能保證的只有「誤報不會造成傷害」：一律標 low、一律不可修、--fix 逐字不變。
+# 那三條寫成綠燈鎖在 test_units.py。模型有沒有真的 drop 掉，只有
+# evals/cases/custom-unit-overlap 測得到。
+#
+# verdict 記的是裁決步驟該怎麼判，不是腳本該怎麼判：
+#     code     產品代號、規格名或俗寫，要 drop
+#     measure  真的是量測值，要 keep 並補空格
+ADJUDICATION = {
+    "cases/case-11-unit-overlap.md": [
+        (5, "R3", "5G", "G", "code", "行動網路制式，不是 5 高斯"),
+        (5, "R3", "4G", "G", "code", "行動網路制式，不是 4 高斯"),
+        (7, "R3", "4K", "K", "code", "螢幕解析度，不是 4 克耳文"),
+        (7, "R3", "8K", "K", "code", "螢幕解析度，不是 8 克耳文"),
+        (11, "R3", "65W", "W", "measure", "功率 65 瓦，要補成 `65 W`"),
+        (11, "R3", "24h", "h", "measure", "24 小時，要補成 `24 h`"),
+        (13, "R3", "3bar", "bar", "measure", "壓力 3 巴，要補成 `3 bar`"),
+        (17, "R3", "2T", "T", "code", "口語的 `2TB`，不是 2 特斯拉"),
+        (19, "R3", "3in1", "in", "code", "三合一配方，不是 3 英吋"),
+    ],
+}
+
+
+def adjudication_for(rel_path):
+    return [
+        {"line": ln, "rule": rule, "contains": frag,
+         "unit": unit, "verdict": verdict, "why": why}
+        for ln, rule, frag, unit, verdict, why in ADJUDICATION.get(rel_path, [])
+    ]
+
+
+def adjudication_units(rel_path):
+    """這份樣本要帶哪些 --units 才會命中。"""
+    return sorted({row[3] for row in ADJUDICATION.get(rel_path, [])})
+
+
 # 不綁在特定樣本上的行為型缺陷，各自對應 test_gaps.py 裡一個具名測試。
 BEHAVIOUR_GAPS = [
     ("fix_file 讀檔沒有關掉萬用換行，CRLF 檔案被靜靜改成 LF",
@@ -111,3 +151,7 @@ BEHAVIOUR_GAPS = [
 def gap_count():
     detection = sum(len(v) for v in GAPS.values())
     return detection + len(FIX_GAPS) + len(BEHAVIOUR_GAPS)
+
+
+def adjudication_count():
+    return sum(len(v) for v in ADJUDICATION.values())
