@@ -263,50 +263,28 @@ Repository | Category | Language
 
 ## Skill
 
-`skills/chinese-copywriting/` is a skill for AI coding agents (Claude Code, Codex CLI, Copilot CLI, OpenCode, Cursor, etc.). It turns the rules above into a proofreading and writing workflow, and ships a checker script.
+`skills/chinese-copywriting/` is a skill for AI coding agents (Claude Code, Codex CLI, Copilot CLI, OpenCode, Cursor, etc.). It turns the rules above into a proofreading and writing workflow, and ships a zero-dependency checker script.
 
-### Installation
-
-Every agent only scans the first level of its skills directory, so drop the whole `chinese-copywriting` directory in:
-
-| Agent | Global | Project |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
-| Codex CLI | `~/.agents/skills/` | `.agents/skills/` |
-| Copilot CLI | `~/.copilot/skills/` | `.github/skills/` |
-| OpenCode | `~/.config/opencode/skills/` | `.claude/skills/` |
-| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
-
-Installing globally for Claude Code:
+Install it with [ai-global](https://github.com/lazyjerry/ai-global):
 
 ```bash
-git clone https://github.com/lazyjerry/chinese-copywriting-guidelines.git
-cp -r chinese-copywriting-guidelines/skills/chinese-copywriting ~/.claude/skills/
+ai-global add-skill lazyjerry/chinese-copywriting-guidelines
+ai-global relink
 ```
 
-Or symlink it instead, so `git pull` keeps it up to date:
+You can also copy or symlink `skills/chinese-copywriting` straight into any agent's skills directory.
 
-```bash
-ln -s "$(pwd)/skills/chinese-copywriting" ~/.claude/skills/chinese-copywriting
-```
-
-Once installed, it triggers whenever you ask the agent to proofread or write Chinese copy.
-
-### Checker script
-
-The script works standalone, no agent required:
+The checker script works standalone, no agent required:
 
 ```bash
 # Report only; exits 1 when violations are found
 python3 skills/chinese-copywriting/scripts/check_copywriting.py <file>
 
-# Fix in place
+# Fix the rules that can be decided mechanically, in place
 python3 skills/chinese-copywriting/scripts/check_copywriting.py --fix <file>
 ```
 
-`--fix` only touches rules that can be decided mechanically: spacing between Chinese and Latin text or numbers, spacing between numbers and units, stray whitespace around fullwidth punctuation, duplicate punctuation, and fullwidth digits. Capitalization, jargon and anything else needing judgement is reported but never rewritten. Add `--dispute` to also check the two rules from the Dispute section.
-
-The script skips code blocks, inline code contents, URLs, Markdown link targets and table delimiters, HTML attributes, and YAML frontmatter.
+Full installation, usage, development and testing notes are in **[SKILL-README.en.md](SKILL-README.en.md)**.
 
 ## Examples of “Who is doing this?”
 

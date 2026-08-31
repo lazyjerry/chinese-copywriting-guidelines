@@ -263,50 +263,28 @@ CSS Text Module Level 4 的 [`text-spacing`](https://www.w3.org/TR/css-text-4/#t
 
 ## Skill
 
-`skills/chinese-copywriting/` 是给 AI 编码代理（Claude Code、Codex CLI、Copilot CLI、OpenCode、Cursor 等）使用的 skill，把本文的规则做成可自动套用的校对与撰写流程，并附一支检查脚本。
+`skills/chinese-copywriting/` 是给 AI 编码代理（Claude Code、Codex CLI、Copilot CLI、OpenCode、Cursor 等）使用的 skill，把本文的规则做成可自动套用的校对与撰写流程，并附一支零依赖的检查脚本。
 
-### 安装
-
-各家工具的 skills 目录都只认第一层，把整个 `chinese-copywriting` 目录放进去即可：
-
-| 工具 | 全局 | 项目 |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
-| Codex CLI | `~/.agents/skills/` | `.agents/skills/` |
-| Copilot CLI | `~/.copilot/skills/` | `.github/skills/` |
-| OpenCode | `~/.config/opencode/skills/` | `.claude/skills/` |
-| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
-
-以 Claude Code 全局安装为例：
+用 [ai-global](https://github.com/lazyjerry/ai-global) 安装：
 
 ```bash
-git clone https://github.com/lazyjerry/chinese-copywriting-guidelines.git
-cp -r chinese-copywriting-guidelines/skills/chinese-copywriting ~/.claude/skills/
+ai-global add-skill lazyjerry/chinese-copywriting-guidelines
+ai-global relink
 ```
 
-或改建 symlink，之后 `git pull` 就能同步更新：
+也可以把 `skills/chinese-copywriting` 直接复制或 symlink 进各工具的 skills 目录。
 
-```bash
-ln -s "$(pwd)/skills/chinese-copywriting" ~/.claude/skills/chinese-copywriting
-```
-
-装好之后，请代理校对或撰写中文文案时就会自动触发。
-
-### 检查脚本
-
-脚本可以单独使用，不需要 AI 代理：
+检查脚本不需要 AI 代理也能单独使用：
 
 ```bash
 # 只报告，有违规时 exit code 为 1
 python3 skills/chinese-copywriting/scripts/check_copywriting.py <文件>
 
-# 就地修正
+# 就地修正可安全机械判定的规则
 python3 skills/chinese-copywriting/scripts/check_copywriting.py --fix <文件>
 ```
 
-`--fix` 只处理可安全机械判定的规则：中英文与数字之间的空格、数字与单位之间的空格、全角标点旁多余的空白、重复的标点、全角数字。大小写、不地道的缩写等需要语义判断的项目一律只报告，不自动改。加上 `--dispute` 会一并检查〈争议〉一节的两条规则。
-
-脚本会自动跳过代码块、行内代码的内容、URL、Markdown 链接目标与表格分隔线、HTML 标签属性，以及 YAML frontmatter。
+完整的安装、使用、开发与测试说明见 **[SKILL-README.zh-Hans.md](SKILL-README.zh-Hans.md)**。
 
 ## 谁在这样做？
 
