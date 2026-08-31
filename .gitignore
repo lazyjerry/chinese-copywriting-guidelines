@@ -8,3 +8,6 @@ __pycache__/
 *.pyc
 
 docs/*
+
+# skill 測試的 eval 輸出
+skill-tests/evals/results/

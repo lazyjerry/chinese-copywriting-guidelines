@@ -1,0 +1,3 @@
+# 測試樣本刻意違反排版與 Markdown 慣例，是測試資料不是文件，不納入 lint。
+skill-tests/script/cases/
+skill-tests/evals/fixtures/

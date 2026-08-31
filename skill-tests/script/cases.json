@@ -1,0 +1,778 @@
+{
+  "note": "由 regenerate_cases.py 產生，不要手改。改樣本或 gaps.py 之後重跑。",
+  "cases": [
+    {
+      "file": "cases/case-01-clean.md",
+      "title": "全部寫對的基準文本",
+      "expect_total": 0,
+      "expect": [],
+      "dispute_total": 0,
+      "gaps": [],
+      "fix_gaps": []
+    },
+    {
+      "file": "cases/case-02-latin-space.md",
+      "title": "中英文與數字之間的空格",
+      "expect_total": 25,
+      "expect": [
+        {
+          "line": 5,
+          "col": 1,
+          "rule": "R1",
+          "snippet": "在LeanCloud上，資料…"
+        },
+        {
+          "line": 5,
+          "col": 10,
+          "rule": "R1",
+          "snippet": "在LeanCloud上，資料儲存是圍繞`AVO…"
+        },
+        {
+          "line": 5,
+          "col": 20,
+          "rule": "R1",
+          "snippet": "…loud上，資料儲存是圍繞`AVObject`進行的…"
+        },
+        {
+          "line": 5,
+          "col": 30,
+          "rule": "R1",
+          "snippet": "…是圍繞`AVObject`進行的。每個 AVObje…"
+        },
+        {
+          "line": 7,
+          "col": 26,
+          "rule": "R1",
+          "snippet": "…錯：在 LeanCloud上，資料儲存是圍繞`AVO…"
+        },
+        {
+          "line": 7,
+          "col": 36,
+          "rule": "R1",
+          "snippet": "…loud上，資料儲存是圍繞`AVObject` 進行…"
+        },
+        {
+          "line": 11,
+          "col": 37,
+          "rule": "R2",
+          "snippet": "…執行初始化。這一步大約要花3分鐘，網路狀況不好時可能…"
+        },
+        {
+          "line": 11,
+          "col": 38,
+          "rule": "R2",
+          "snippet": "…行初始化。這一步大約要花3分鐘，網路狀況不好時可能拉…"
+        },
+        {
+          "line": 11,
+          "col": 53,
+          "rule": "R2",
+          "snippet": "…，網路狀況不好時可能拉長到10分鐘。若逾時請重試，重…"
+        },
+        {
+          "line": 11,
+          "col": 55,
+          "rule": "R2",
+          "snippet": "…路狀況不好時可能拉長到10分鐘。若逾時請重試，重試上…"
+        },
+        {
+          "line": 11,
+          "col": 70,
+          "rule": "R2",
+          "snippet": "…。若逾時請重試，重試上限是5次。"
+        },
+        {
+          "line": 11,
+          "col": 71,
+          "rule": "R2",
+          "snippet": "…若逾時請重試，重試上限是5次。"
+        },
+        {
+          "line": 13,
+          "col": 28,
+          "rule": "R1",
+          "snippet": "…要直接寫死在原始碼裡。CI環境可以透過 Secret…"
+        },
+        {
+          "line": 17,
+          "col": 28,
+          "rule": "R2",
+          "snippet": "…符。請確認 SDK 版本在2.0以上，Node 版本…"
+        },
+        {
+          "line": 17,
+          "col": 31,
+          "rule": "R2",
+          "snippet": "…確認 SDK 版本在2.0以上，Node 版本在18…"
+        },
+        {
+          "line": 17,
+          "col": 42,
+          "rule": "R2",
+          "snippet": "….0以上，Node 版本在18以上。舊版的 Node…"
+        },
+        {
+          "line": 17,
+          "col": 44,
+          "rule": "R2",
+          "snippet": "…以上，Node 版本在18以上。舊版的 Node12…"
+        },
+        {
+          "line": 19,
+          "col": 11,
+          "rule": "R1",
+          "snippet": "若你在 Windows上開發，注意路徑分隔符的差…"
+        },
+        {
+          "line": 19,
+          "col": 31,
+          "rule": "R1",
+          "snippet": "…徑分隔符的差異。這個問題在macOS與 Linux…"
+        },
+        {
+          "line": 19,
+          "col": 36,
+          "rule": "R1",
+          "snippet": "…差異。這個問題在macOS與 Linux 上不會出現…"
+        },
+        {
+          "line": 23,
+          "col": 36,
+          "rule": "R2",
+          "snippet": "…請求的耗時。實測一般查詢在200毫秒以內完成，複雜的…"
+        },
+        {
+          "line": 23,
+          "col": 39,
+          "rule": "R2",
+          "snippet": "…耗時。實測一般查詢在200毫秒以內完成，複雜的聚合查…"
+        },
+        {
+          "line": 23,
+          "col": 57,
+          "rule": "R2",
+          "snippet": "…成，複雜的聚合查詢可能需要2秒。"
+        },
+        {
+          "line": 23,
+          "col": 58,
+          "rule": "R2",
+          "snippet": "…，複雜的聚合查詢可能需要2秒。"
+        },
+        {
+          "line": 25,
+          "col": 20,
+          "rule": "R1",
+          "snippet": "…輩𠮟responsible地檢討了一番，紀錄裡寫著他…"
+        }
+      ],
+      "dispute_total": 25,
+      "gaps": [
+        {
+          "line": 25,
+          "rule": "R1",
+          "contains": "𠮟responsible",
+          "kind": "missed",
+          "why": "CJK 字元類只涵蓋四段 BMP 範圍，擴充 B 以上（U+20000+）的漢字貼著英文抓不到",
+          "col": 9
+        }
+      ],
+      "fix_gaps": []
+    },
+    {
+      "file": "cases/case-03-units.md",
+      "title": "數字與單位之間的空格",
+      "expect_total": 10,
+      "expect": [
+        {
+          "line": 5,
+          "col": 13,
+          "rule": "R3",
+          "snippet": "我家的光纖入屋寬頻有 10Gbps，工作站的 SSD 一共…"
+        },
+        {
+          "line": 5,
+          "col": 33,
+          "rule": "R3",
+          "snippet": "…站的 SSD 一共有 20TB。備份用的機械硬碟另外掛…"
+        },
+        {
+          "line": 5,
+          "col": 57,
+          "rule": "R3",
+          "snippet": "…另外掛了兩顆，單顆容量 8TB，實測循序寫入穩定在 2…"
+        },
+        {
+          "line": 5,
+          "col": 73,
+          "rule": "R3",
+          "snippet": "…實測循序寫入穩定在 210MB 上下。"
+        },
+        {
+          "line": 7,
+          "col": 9,
+          "rule": "R3",
+          "snippet": "系統碟只留 512MB 的 EFI 分割區，其…"
+        },
+        {
+          "line": 7,
+          "col": 44,
+          "rule": "R3",
+          "snippet": "…用。記憶體時脈跑在 3.6GHz，散熱器換成塔扇之後溫度…"
+        },
+        {
+          "line": 15,
+          "col": 6,
+          "rule": "R3",
+          "snippet": "角度為 90 ° 的角，就是直角。新 M…"
+        },
+        {
+          "line": 15,
+          "col": 35,
+          "rule": "R3",
+          "snippet": "…Book Pro 有 15 % 的 CPU 效能提升。"
+        },
+        {
+          "line": 17,
+          "col": 8,
+          "rule": "R3",
+          "snippet": "面板邊框只有 4mm，整機厚度 15mm，收…"
+        },
+        {
+          "line": 17,
+          "col": 18,
+          "rule": "R3",
+          "snippet": "…有 4mm，整機厚度 15mm，收在背包側袋剛剛好。"
+        }
+      ],
+      "dispute_total": 10,
+      "gaps": [
+        {
+          "line": 29,
+          "rule": "R3",
+          "contains": "25 °",
+          "kind": "false_positive",
+          "why": "攝氏度依國際單位制應保留空格，DEGREE_SPACE_RE 沒分辨角度與溫度，把正確寫法判成違規"
+        },
+        {
+          "line": 21,
+          "rule": "R3",
+          "contains": "44.1kHz",
+          "kind": "missed",
+          "why": "UNITS 收了 KHz 卻沒收正確 SI 寫法的 kHz"
+        },
+        {
+          "line": 21,
+          "rule": "R3",
+          "contains": "120dB",
+          "kind": "missed",
+          "why": "UNITS 缺聲壓單位 dB"
+        },
+        {
+          "line": 23,
+          "rule": "R3",
+          "contains": "5000mAh",
+          "kind": "missed",
+          "why": "UNITS 缺電池容量單位 mAh"
+        },
+        {
+          "line": 23,
+          "rule": "R3",
+          "contains": "65W",
+          "kind": "missed",
+          "why": "UNITS 缺功率單位 W 系列"
+        },
+        {
+          "line": 25,
+          "rule": "R3",
+          "contains": "7nm",
+          "kind": "missed",
+          "why": "UNITS 缺長度單位 nm"
+        },
+        {
+          "line": 25,
+          "rule": "R3",
+          "contains": "16GiB",
+          "kind": "missed",
+          "why": "UNITS 缺二進位詞頭 GiB／MiB／TiB"
+        },
+        {
+          "line": 31,
+          "rule": "R3",
+          "contains": "100ms",
+          "kind": "missed",
+          "why": "UNITS 缺時間單位 ms"
+        },
+        {
+          "line": 31,
+          "rule": "R3",
+          "contains": "180ms",
+          "kind": "missed",
+          "why": "UNITS 缺時間單位 ms"
+        }
+      ],
+      "fix_gaps": []
+    },
+    {
+      "file": "cases/case-04-punct-space.md",
+      "title": "全形標點兩側的空白",
+      "expect_total": 6,
+      "expect": [
+        {
+          "line": 5,
+          "col": 14,
+          "rule": "R4",
+          "snippet": "…剛買了一部 iPhone ，好開心！包裝比上一代薄…"
+        },
+        {
+          "line": 7,
+          "col": 29,
+          "rule": "R4",
+          "snippet": "…剛買了一部 iPhone， 好開心！這句話收回一半。"
+        },
+        {
+          "line": 9,
+          "col": 10,
+          "rule": "R4",
+          "snippet": "機身重量比想像中沉 ，握在手上很有份量。開機…"
+        },
+        {
+          "line": 9,
+          "col": 27,
+          "rule": "R4",
+          "snippet": "…上很有份量。開機動畫跑完 、輸入完 Apple I…"
+        },
+        {
+          "line": 32,
+          "col": 33,
+          "rule": "R7",
+          "snippet": "…在十七小時上下，誤差大約１５％ 左右。"
+        },
+        {
+          "line": 32,
+          "col": 34,
+          "rule": "R7",
+          "snippet": "…十七小時上下，誤差大約１５％ 左右。"
+        }
+      ],
+      "dispute_total": 6,
+      "gaps": [
+        {
+          "line": 30,
+          "rule": "R4",
+          "contains": "〔",
+          "kind": "missed",
+          "why": "FULLWIDTH_PUNCT 手寫清單沒收全形方括號，Unicode 標為 Ps／Pe"
+        },
+        {
+          "line": 30,
+          "rule": "R4",
+          "contains": "｝",
+          "kind": "missed",
+          "why": "FULLWIDTH_PUNCT 手寫清單沒收全形大括號"
+        },
+        {
+          "line": 32,
+          "rule": "R4",
+          "contains": "＂",
+          "kind": "missed",
+          "why": "FULLWIDTH_PUNCT 手寫清單沒收全形雙引號"
+        },
+        {
+          "line": 32,
+          "rule": "R4",
+          "contains": "％",
+          "kind": "missed",
+          "why": "FULLWIDTH_PUNCT 手寫清單沒收全形百分號"
+        },
+        {
+          "line": 34,
+          "rule": "R4",
+          "contains": "／",
+          "kind": "missed",
+          "why": "FULLWIDTH_PUNCT 手寫清單沒收全形斜線"
+        }
+      ],
+      "fix_gaps": [
+        {
+          "line": 32,
+          "rule": "R2",
+          "contains": "誤差大約15％",
+          "why": "fix_fullwidth_digit 把 `１５` 轉成 `15` 之後製造出中文與數字之間缺空格，但 fix_missing_space 在 FIXERS 裡排在它前面，同一次 pass 收不到"
+        }
+      ]
+    },
+    {
+      "file": "cases/case-05-duplicate.md",
+      "title": "重複使用標點符號",
+      "expect_total": 6,
+      "expect": [
+        {
+          "line": 5,
+          "col": 35,
+          "rule": "R5",
+          "snippet": "…。德國隊竟然戰勝了巴西隊！！這個比數在賽前沒有任何一…"
+        },
+        {
+          "line": 7,
+          "col": 36,
+          "rule": "R5",
+          "snippet": "…。德國隊竟然戰勝了巴西隊！！！！！！！！他大概重複了十幾次。"
+        },
+        {
+          "line": 11,
+          "col": 35,
+          "rule": "R5",
+          "snippet": "…準備。她竟然對你說「喵」？？！！這句是隔壁桌的對話，被麥…"
+        },
+        {
+          "line": 13,
+          "col": 26,
+          "rule": "R5",
+          "snippet": "…寫法。她竟然對你說「喵」？！？！？？！！排版上同樣不可取。"
+        },
+        {
+          "line": 27,
+          "col": 14,
+          "rule": "R4",
+          "snippet": "…後一句留給球迷。謝謝你們！ ！中間隔了一個空格的重複…"
+        },
+        {
+          "line": 27,
+          "col": 15,
+          "rule": "R4",
+          "snippet": "…一句留給球迷。謝謝你們！ ！中間隔了一個空格的重複…"
+        }
+      ],
+      "dispute_total": 6,
+      "gaps": [
+        {
+          "line": 23,
+          "rule": "R5",
+          "contains": "。。。",
+          "kind": "missed",
+          "why": "DUP_PUNCT_RE 只認 `[！？]{2,}`，重複句號抓不到"
+        },
+        {
+          "line": 25,
+          "rule": "R5",
+          "contains": "，，",
+          "kind": "missed",
+          "why": "DUP_PUNCT_RE 只認 `[！？]{2,}`，重複逗號抓不到"
+        },
+        {
+          "line": 27,
+          "rule": "R5",
+          "contains": "！ ！",
+          "kind": "missed",
+          "why": "重複標點中間夾空白時 DUP_PUNCT_RE 不連續，只被 R4 抓到空格"
+        }
+      ],
+      "fix_gaps": [
+        {
+          "line": 27,
+          "rule": "R5",
+          "contains": "謝謝你們！！",
+          "why": "fix_fullwidth_space 拿掉 `！ ！` 中間的空白之後製造出重複標點，但 fix_duplicate_punct 在 FIXERS 裡排在它前面，同一次 pass 收不到"
+        }
+      ]
+    },
+    {
+      "file": "cases/case-06-halfwidth.md",
+      "title": "全形與半形標點",
+      "expect_total": 22,
+      "expect": [
+        {
+          "line": 5,
+          "col": 1,
+          "rule": "R6",
+          "snippet": "嗨! 你知道嘛? 今天前台的…"
+        },
+        {
+          "line": 5,
+          "col": 7,
+          "rule": "R6",
+          "snippet": "嗨! 你知道嘛? 今天前台的小妹跟我說…"
+        },
+        {
+          "line": 5,
+          "col": 19,
+          "rule": "R6",
+          "snippet": "…嘛? 今天前台的小妹跟我說 \"喵\" 了哎!這段刻意用半…"
+        },
+        {
+          "line": 5,
+          "col": 22,
+          "rule": "R6",
+          "snippet": "…今天前台的小妹跟我說 \"喵\" 了哎!這段刻意用半形標…"
+        },
+        {
+          "line": 5,
+          "col": 26,
+          "rule": "R6",
+          "snippet": "…的小妹跟我說 \"喵\" 了哎!這段刻意用半形標點寫成，…"
+        },
+        {
+          "line": 7,
+          "col": 15,
+          "rule": "R6",
+          "snippet": "…不留空白的版本一樣不對。嗨!你知道嘛?今天前台的小妹…"
+        },
+        {
+          "line": 7,
+          "col": 20,
+          "rule": "R6",
+          "snippet": "…版本一樣不對。嗨!你知道嘛?今天前台的小妹跟我說\"喵…"
+        },
+        {
+          "line": 7,
+          "col": 31,
+          "rule": "R6",
+          "snippet": "…道嘛?今天前台的小妹跟我說\"喵\"了哎!"
+        },
+        {
+          "line": 7,
+          "col": 33,
+          "rule": "R6",
+          "snippet": "…?今天前台的小妹跟我說\"喵\"了哎!"
+        },
+        {
+          "line": 7,
+          "col": 36,
+          "rule": "R6",
+          "snippet": "…前台的小妹跟我說\"喵\"了哎!"
+        },
+        {
+          "line": 9,
+          "col": 6,
+          "rule": "R6",
+          "snippet": "核磁共振成像 (NMRI) 是什麼原理都…"
+        },
+        {
+          "line": 9,
+          "col": 13,
+          "rule": "R6",
+          "snippet": "核磁共振成像 (NMRI) 是什麼原理都不知道? JF…"
+        },
+        {
+          "line": 9,
+          "col": 23,
+          "rule": "R6",
+          "snippet": "…RI) 是什麼原理都不知道? JFGI!括號與問號都…"
+        },
+        {
+          "line": 9,
+          "col": 30,
+          "rule": "R6",
+          "snippet": "…原理都不知道? JFGI!括號與問號都應該改成全形。"
+        },
+        {
+          "line": 11,
+          "col": 19,
+          "rule": "R6",
+          "snippet": "…法也一併列出。核磁共振成像(NMRI)是什麼原理都不…"
+        },
+        {
+          "line": 11,
+          "col": 25,
+          "rule": "R6",
+          "snippet": "…。核磁共振成像(NMRI)是什麼原理都不知道?JFG…"
+        },
+        {
+          "line": 11,
+          "col": 34,
+          "rule": "R6",
+          "snippet": "…MRI)是什麼原理都不知道?JFGI!"
+        },
+        {
+          "line": 15,
+          "col": 19,
+          "rule": "R7",
+          "snippet": "…格不便宜。這件蛋糕只賣 １０００ 元，機器要價則是…"
+        },
+        {
+          "line": 15,
+          "col": 20,
+          "rule": "R7",
+          "snippet": "…不便宜。這件蛋糕只賣 １０００ 元，機器要價則是它…"
+        },
+        {
+          "line": 15,
+          "col": 21,
+          "rule": "R7",
+          "snippet": "…便宜。這件蛋糕只賣 １０００ 元，機器要價則是它的…"
+        },
+        {
+          "line": 15,
+          "col": 22,
+          "rule": "R7",
+          "snippet": "…宜。這件蛋糕只賣 １０００ 元，機器要價則是它的十…"
+        },
+        {
+          "line": 29,
+          "col": 30,
+          "rule": "R6",
+          "snippet": "…核磁共振成像（NMRI ) 是什麼原理都不知道？左邊全…"
+        }
+      ],
+      "dispute_total": 22,
+      "gaps": [
+        {
+          "line": 21,
+          "rule": "R6",
+          "contains": "收好.這個",
+          "kind": "missed",
+          "why": "HALFWIDTH_PUNCT_RE 的集合只有 `,!?;:`，缺半形句號"
+        },
+        {
+          "line": 23,
+          "rule": "R6",
+          "contains": "'標準流程'",
+          "kind": "missed",
+          "why": "CJK_QUOTE_RE 只認半形雙引號，缺單引號"
+        },
+        {
+          "line": 25,
+          "rule": "R6",
+          "contains": "[影像]",
+          "kind": "missed",
+          "why": "半形方括號不在任何半形標點集合裡"
+        },
+        {
+          "line": 27,
+          "rule": "R6",
+          "contains": "{進階}",
+          "kind": "missed",
+          "why": "半形大括號不在任何半形標點集合裡"
+        }
+      ],
+      "fix_gaps": []
+    },
+    {
+      "file": "cases/case-07-english.md",
+      "title": "英文整句與書名內的標點",
+      "expect_total": 4,
+      "expect": [
+        {
+          "line": 5,
+          "col": 25,
+          "rule": "R8",
+          "snippet": "…「Stay hungry，stay foolish…"
+        },
+        {
+          "line": 5,
+          "col": 38,
+          "rule": "R8",
+          "snippet": "…stay foolish。」這裡的逗號與句號都用了…"
+        },
+        {
+          "line": 11,
+          "col": 6,
+          "rule": "R8",
+          "snippet": "推薦你閱讀《Hackers＆Painters：Big Ideas from the Computer Age》，非常的有趣。中文書名號…"
+        },
+        {
+          "line": 17,
+          "col": 52,
+          "rule": "R8",
+          "snippet": "…phistication。」同樣要把句號換成半形。"
+        }
+      ],
+      "dispute_total": 4,
+      "gaps": [
+        {
+          "line": 23,
+          "rule": "R8",
+          "contains": "He said，it works",
+          "kind": "missed",
+          "why": "QUOTED_SPAN_RE 只掃引號與書名號包起來的整段，沒有引號的英文整句不檢查"
+        },
+        {
+          "line": 25,
+          "rule": "R8",
+          "contains": "Stay hungry！",
+          "kind": "missed",
+          "why": "FULLWIDTH_IN_EN_RE 缺全形驚嘆號"
+        },
+        {
+          "line": 27,
+          "rule": "R8",
+          "contains": "Are you serious？",
+          "kind": "missed",
+          "why": "FULLWIDTH_IN_EN_RE 缺全形問號"
+        }
+      ],
+      "fix_gaps": []
+    },
+    {
+      "file": "cases/case-08-masking.md",
+      "title": "遮罩區段一律不檢查",
+      "expect_total": 0,
+      "expect": [],
+      "dispute_total": 0,
+      "gaps": [],
+      "fix_gaps": []
+    },
+    {
+      "file": "cases/case-09-code-span.md",
+      "title": "行內程式碼兩側的空格",
+      "expect_total": 7,
+      "expect": [
+        {
+          "line": 5,
+          "col": 22,
+          "rule": "R1",
+          "snippet": "…oud 上，資料儲存是圍繞`AVObject`進行的…"
+        },
+        {
+          "line": 5,
+          "col": 32,
+          "rule": "R1",
+          "snippet": "…是圍繞`AVObject`進行的。這一行的行內程式碼…"
+        },
+        {
+          "line": 9,
+          "col": 34,
+          "rule": "R1",
+          "snippet": "…圍繞 `AVObject`進行的。"
+        },
+        {
+          "line": 11,
+          "col": 15,
+          "rule": "R1",
+          "snippet": "…過來也一樣：資料儲存是圍繞`AVObject` 進行…"
+        },
+        {
+          "line": 19,
+          "col": 3,
+          "rule": "R1",
+          "snippet": "呼叫`save()`之後，伺服…"
+        },
+        {
+          "line": 19,
+          "col": 11,
+          "rule": "R1",
+          "snippet": "呼叫`save()`之後，伺服器會回傳更新後的…"
+        },
+        {
+          "line": 21,
+          "col": 8,
+          "rule": "R1",
+          "snippet": "刪除單筆資料用`destroy()`，批…"
+        }
+      ],
+      "dispute_total": 7,
+      "gaps": [],
+      "fix_gaps": []
+    },
+    {
+      "file": "cases/case-10-dispute.md",
+      "title": "爭議規則預設關閉",
+      "expect_total": 0,
+      "expect": [],
+      "dispute_total": 6,
+      "gaps": [],
+      "fix_gaps": []
+    }
+  ]
+}
