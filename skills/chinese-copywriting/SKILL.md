@@ -1,15 +1,16 @@
 ---
 name: chinese-copywriting
 description: |
-  中文文案排版校對與撰寫規範（依《中文文案排版指北》）。
-  校對模式：輸出違規清單，互動確認後才修正；撰寫模式：產出中文文案時直接套用排版規則。
-  規則涵蓋中英文／數字／單位間空格、全形半形標點、重複標點、
-  專有名詞大小寫、不道地縮寫。
-  NOT for: 錯別字校訂與文句潤飾、去除 AI 痕跡、翻譯。
+  要校對、檢查或修正中文文案的排版時使用；本工具自己產出中文文案時也套用同一套規則。
+  觸發語：校對、排版、排版檢查、中英文空格、全形半形、標點檢查、文案規範，
+  或指名某份中文文件要求檢查格式。
+  只處理排版層：中英文與數字／單位之間的空格、全形半形標點、重複標點、
+  專有名詞大小寫、不道地縮寫；依據《中文文案排版指北》。
+  不要用於：錯別字校訂、文句潤飾、去除 AI 痕跡、翻譯。
 allowed-tools: Read, Edit, Bash, Glob, Grep, AskUserQuestion
 metadata:
-  trigger: 校對或撰寫中文文案、檢查中英文空格與全半形標點時觸發
-  source: chinese-copywriting-guidelines README.md
+  version: "1.1.0"
+  author: "LazyJerry"
 ---
 
 <!--lint disable heading-style-->
