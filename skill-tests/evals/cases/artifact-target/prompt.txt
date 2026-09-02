@@ -1,0 +1,1 @@
+校對 skill-tests/evals/fixtures/generated-report.md，處置方式選「全部修正」。
