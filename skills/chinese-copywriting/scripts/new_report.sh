@@ -44,13 +44,13 @@ resolve_root() {
 outdir="$(resolve_root "$src")/docs/chinese-copywriting"
 mkdir -p "$outdir"
 
-# 報告是本機產出，不該推上遠端。skill 被複製到別的專案時那裡不一定有對應的忽略規則，
-# 所以在目錄自己這層擋掉。
+# 這個目錄整個是本機產出，不該推上遠端——報告、裁決紀錄、連這份 .gitignore 自己都算。
+# skill 被複製到別的專案時那裡不一定有對應的忽略規則，所以在目錄自己這層擋掉。
 if [ ! -e "$outdir/.gitignore" ]; then
   cat > "$outdir/.gitignore" <<'IGNORE'
 # 校對報告只留在本機，不進版控
 *
-!.gitignore
+# 專案級裁決不進版控
 IGNORE
 fi
 

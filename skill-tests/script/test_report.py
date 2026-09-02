@@ -57,7 +57,10 @@ class TestReportPath(unittest.TestCase):
             self.assertTrue(ignore.exists(), "第一次建立目錄要補上 .gitignore")
             body = ignore.read_text(encoding="utf-8")
             self.assertIn("*", body)
-            self.assertIn("!.gitignore", body)
+            self.assertEqual(
+                [], [ln for ln in body.splitlines() if ln.startswith("!")],
+                "這個目錄整個不進版控，沒有例外——報告、裁決、.gitignore 自己都算",
+            )
 
             ignore.write_text("# 使用者改過的\n*\n", encoding="utf-8")
             run(src)
