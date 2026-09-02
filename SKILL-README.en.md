@@ -90,12 +90,20 @@ python3 ~/.claude/skills/chinese-copywriting/scripts/check_copywriting.py --help
 
 Ask the agent to proofread, check typesetting, or check spacing between Chinese and Latin text — or just name a Chinese document and ask for a format check.
 
-The confirmation step sits at the very front. **Both questions are asked before anything runs**:
+The confirmation step sits at the very front. **Four questions are asked before anything runs**:
 
-1. **Which file** — the file currently open in your editor is the default, marked as the first option. If your message already names a path, that path is used.
+1. **Which file** — the file currently open in your editor is the default, marked as the first option. If your message already names a path, that path is used. Once the target is settled it is checked for being a build artifact: proofreading generated output is wasted work, since the next build restores it.
 2. **What to do with the findings** — auto-fix what is mechanically safe, fix everything, report only, or show the list first and decide afterwards.
+3. **Whether to extend the unit list** — the 23 built-in units are deliberately narrow. You can pass common computing and electronics units, or list your own. Anything you add is marked low confidence and never auto-fixed, because unit abbreviations and product designations like `5G` or `4K` look identical to a regex.
+4. **Whether any section is exempt** — fields that mirror external data verbatim, pasted error messages, and other passages meant to stay as they are.
+
+Anything already recorded in `docs/chinese-copywriting/decisions.md` is not asked again.
 
 **It never edits files on its own, and never starts before you confirm.** No `--fix` runs until you approve it.
+
+**Project-level rulings accumulate.** Once the project decides that English journal names keep their Chinese title brackets, or that `Nvidia` stays as written, the conclusion goes into `docs/chinese-copywriting/decisions.md` and the next run follows it rather than deciding again. That whole directory stays out of version control, so the rulings accumulate on one machine only — a fresh clone starts empty, and they are not shared across a team. To have everyone follow the same rulings, record them separately in a style guide that is tracked.
+
+When the target is a build artifact, fixes land on the source rather than the output: run `--fix` on the artifact once as a dry run to confirm the scope, write the same replacements back into the generator script or template, rebuild, then `diff` to verify every copy agrees.
 
 Every reported violation carries a citation back to the single source of truth:
 
